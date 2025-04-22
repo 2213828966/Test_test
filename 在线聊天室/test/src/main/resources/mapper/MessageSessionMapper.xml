@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hfy.chat_room.model.MessageSessionMapper">
+    <select id="getSessionIdsByUserId" resultType="java.lang.Integer">
+        select sessionId from message_session
+        where sessionId in
+        (select sessionId from message_session_user where userId = #{userId})
+        order by lastTime desc
+    </select>
+
+    <select id="getFriendsBySessionId" resultType="com.hfy.chat_room.model.Friend">
+        select userId as friendId, username as friendName from user
+        where userId in
+        (select userId from message_session_user where sessionId = #{sessionId} and userId != #{selfUserId})
+    </select>
+
+    <insert id="addMessageSession" useGeneratedKeys="true" keyProperty="sessionId">
+        insert into message_session values(null,now());
+    </insert>
+
+    <insert id="addMessageSessionUser">
+        insert into message_session_user values(#{sessionId}, #{userId})
+    </insert>
+
+    <delete id="deleteSession">
+        delete from message_session where sessionId = #{sessionId}
+    </delete>
+
+    <delete id="deleteSessionMessages">
+        delete from message where sessionId = #{sessionId}
+    </delete>
+
+    <delete id="deleteSessionId">
+        delete from message_session_user where sessionId = #{sessionId}
+    </delete>
+
+    <select id="getSessionId" resultType="java.lang.Integer">
+        SELECT sessionId
+        FROM message_session_user
+        WHERE userId = #{userId1}
+          AND sessionId IN (
+            SELECT sessionId
+            FROM message_session_user
+            WHERE userId = #{userId2}
+        )
+            LIMIT 1
+    </select>
+</mapper>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hfy.chat_room.model.FriendMapper">
+    <select id="selectFriendList" resultType="com.hfy.chat_room.model.Friend">
+        select userId as friendId, username as friendName from user where userId in
+        (select friendId from friend where userId = #{userId})
+    </select>
+
+    <insert id="addFriend">
+        insert into friend (userId, friendId) values (#{userId}, #{friendId})
+    </insert>
+
+    <select id="searchUserByName" resultType="com.hfy.chat_room.model.User">
+        select userId, username from user where username = #{username}
+    </select>
+
+    <select id="checkFriendship" resultType="java.lang.Integer">
+        select count(*) from friend 
+        where userId = #{userId} and friendId = #{friendId}
+    </select>
+
+    <select id="searchFriendByName">
+        SELECT f.friendId
+        FROM friend f
+                 JOIN user u ON f.friendId = u.userId
+        WHERE u.username = #{username}
+    </select>
+
+    <delete id="deleteFriend">
+        delete from friend
+        where (userId = #{userId} and friendId = #{friendId})
+           or (userId = #{friendId} and friendId = #{userId})
+    </delete>
+</mapper>
